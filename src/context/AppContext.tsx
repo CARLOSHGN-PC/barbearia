@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Appointment, Barber, Service, Settings, SiteContent } from '../types';
 import { initialBarbers, initialServices, initialSettings, initialSiteContent } from '../data/initialData';
+import { db } from '../firebase';
+import { collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 interface AppContextType {
   appointments: Appointment[];
@@ -8,114 +10,159 @@ interface AppContextType {
   barbers: Barber[];
   settings: Settings;
   siteContent: SiteContent;
-  addAppointment: (appointment: Appointment) => void;
-  updateAppointmentStatus: (id: string, status: Appointment['status'], feeApplied?: boolean) => void;
-  updateAppointment: (id: string, appointment: Partial<Appointment>) => void;
-  deleteAppointment: (id: string) => void;
-  updateSettings: (settings: Settings) => void;
-  updateSiteContent: (content: SiteContent) => void;
-  addService: (service: Service) => void;
-  updateService: (id: string, service: Partial<Service>) => void;
-  deleteService: (id: string) => void;
-  addBarber: (barber: Barber) => void;
-  updateBarber: (id: string, barber: Partial<Barber>) => void;
-  deleteBarber: (id: string) => void;
-  resetData: () => void;
+  addAppointment: (appointment: Appointment) => Promise<void>;
+  updateAppointmentStatus: (id: string, status: Appointment['status'], feeApplied?: boolean) => Promise<void>;
+  updateAppointment: (id: string, appointment: Partial<Appointment>) => Promise<void>;
+  deleteAppointment: (id: string) => Promise<void>;
+  updateSettings: (settings: Settings) => Promise<void>;
+  updateSiteContent: (content: SiteContent) => Promise<void>;
+  addService: (service: Service) => Promise<void>;
+  updateService: (id: string, service: Partial<Service>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
+  addBarber: (barber: Barber) => Promise<void>;
+  updateBarber: (id: string, barber: Partial<Barber>) => Promise<void>;
+  deleteBarber: (id: string) => Promise<void>;
+  resetData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    const saved = localStorage.getItem('barbershop_appointments');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [services, setServices] = useState<Service[]>(() => {
-    const saved = localStorage.getItem('barbershop_services');
-    return saved ? JSON.parse(saved) : initialServices;
-  });
-
-  const [barbers, setBarbers] = useState<Barber[]>(() => {
-    const saved = localStorage.getItem('barbershop_barbers');
-    return saved ? JSON.parse(saved) : initialBarbers;
-  });
-
-  const [settings, setSettings] = useState<Settings>(() => {
-    const saved = localStorage.getItem('barbershop_settings');
-    return saved ? JSON.parse(saved) : initialSettings;
-  });
-
-  const [siteContent, setSiteContent] = useState<SiteContent>(() => {
-    const saved = localStorage.getItem('barbershop_site_content');
-    return saved ? JSON.parse(saved) : initialSiteContent;
-  });
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [services, setServices] = useState<Service[]>(initialServices);
+  const [barbers, setBarbers] = useState<Barber[]>(initialBarbers);
+  const [settings, setSettings] = useState<Settings>(initialSettings);
+  const [siteContent, setSiteContent] = useState<SiteContent>(initialSiteContent);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('barbershop_appointments', JSON.stringify(appointments));
-  }, [appointments]);
+    const unsubAppointments = onSnapshot(collection(db, 'appointments'), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
+      setAppointments(data);
+    });
 
-  useEffect(() => {
-    localStorage.setItem('barbershop_services', JSON.stringify(services));
-  }, [services]);
+    const unsubServices = onSnapshot(collection(db, 'services'), (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
+        setServices(data);
+      } else {
+        // Initialize if empty
+        initialServices.forEach(async (service) => {
+          await setDoc(doc(db, 'services', service.id), service);
+        });
+      }
+    });
 
-  useEffect(() => {
-    localStorage.setItem('barbershop_barbers', JSON.stringify(barbers));
-  }, [barbers]);
+    const unsubBarbers = onSnapshot(collection(db, 'barbers'), (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Barber));
+        setBarbers(data);
+      } else {
+        // Initialize if empty
+        initialBarbers.forEach(async (barber) => {
+          await setDoc(doc(db, 'barbers', barber.id), barber);
+        });
+      }
+    });
 
-  useEffect(() => {
-    localStorage.setItem('barbershop_settings', JSON.stringify(settings));
-  }, [settings]);
+    const unsubSettings = onSnapshot(doc(db, 'config', 'settings'), (snapshot) => {
+      if (snapshot.exists()) {
+        setSettings(snapshot.data() as Settings);
+      } else {
+        setDoc(doc(db, 'config', 'settings'), initialSettings);
+      }
+    });
 
-  useEffect(() => {
-    localStorage.setItem('barbershop_site_content', JSON.stringify(siteContent));
-  }, [siteContent]);
+    const unsubSiteContent = onSnapshot(doc(db, 'config', 'siteContent'), (snapshot) => {
+      if (snapshot.exists()) {
+        setSiteContent(snapshot.data() as SiteContent);
+      } else {
+        setDoc(doc(db, 'config', 'siteContent'), initialSiteContent);
+      }
+    });
 
-  const addAppointment = (appointment: Appointment) => {
-    setAppointments((prev) => [...prev, appointment]);
+    setInitialized(true);
+
+    return () => {
+      unsubAppointments();
+      unsubServices();
+      unsubBarbers();
+      unsubSettings();
+      unsubSiteContent();
+    };
+  }, []);
+
+  const addAppointment = async (appointment: Appointment) => {
+    await setDoc(doc(db, 'appointments', appointment.id), appointment);
   };
 
-  const updateAppointmentStatus = (id: string, status: Appointment['status'], feeApplied?: boolean) => {
-    setAppointments((prev) =>
-      prev.map((app) =>
-        app.id === id ? { ...app, status, cancellationFeeApplied: feeApplied ?? app.cancellationFeeApplied } : app
-      )
-    );
+  const updateAppointmentStatus = async (id: string, status: Appointment['status'], feeApplied?: boolean) => {
+    const updateData: any = { status };
+    if (feeApplied !== undefined) {
+      updateData.cancellationFeeApplied = feeApplied;
+    }
+    await updateDoc(doc(db, 'appointments', id), updateData);
   };
 
-  const updateAppointment = (id: string, appointment: Partial<Appointment>) => {
-    setAppointments((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, ...appointment } : app))
-    );
+  const updateAppointment = async (id: string, appointment: Partial<Appointment>) => {
+    await updateDoc(doc(db, 'appointments', id), appointment);
   };
 
-  const deleteAppointment = (id: string) => {
-    setAppointments((prev) => prev.filter((app) => app.id !== id));
+  const deleteAppointment = async (id: string) => {
+    await deleteDoc(doc(db, 'appointments', id));
   };
 
-  const updateSettings = (newSettings: Settings) => {
-    setSettings(newSettings);
+  const updateSettings = async (newSettings: Settings) => {
+    await setDoc(doc(db, 'config', 'settings'), newSettings);
   };
 
-  const updateSiteContent = (newContent: SiteContent) => {
-    setSiteContent(newContent);
+  const updateSiteContent = async (newContent: SiteContent) => {
+    await setDoc(doc(db, 'config', 'siteContent'), newContent);
   };
 
-  const addService = (service: Service) => setServices((prev) => [...prev, service]);
-  const updateService = (id: string, service: Partial<Service>) => setServices((prev) => prev.map((s) => (s.id === id ? { ...s, ...service } : s)));
-  const deleteService = (id: string) => setServices((prev) => prev.filter((s) => s.id !== id));
-
-  const addBarber = (barber: Barber) => setBarbers((prev) => [...prev, barber]);
-  const updateBarber = (id: string, barber: Partial<Barber>) => setBarbers((prev) => prev.map((b) => (b.id === id ? { ...b, ...barber } : b)));
-  const deleteBarber = (id: string) => setBarbers((prev) => prev.filter((b) => b.id !== id));
-
-  const resetData = () => {
-    setAppointments([]);
-    setServices(initialServices);
-    setBarbers(initialBarbers);
-    setSettings(initialSettings);
-    setSiteContent(initialSiteContent);
+  const addService = async (service: Service) => {
+    await setDoc(doc(db, 'services', service.id), service);
   };
+
+  const updateService = async (id: string, service: Partial<Service>) => {
+    await updateDoc(doc(db, 'services', id), service);
+  };
+
+  const deleteService = async (id: string) => {
+    await deleteDoc(doc(db, 'services', id));
+  };
+
+  const addBarber = async (barber: Barber) => {
+    await setDoc(doc(db, 'barbers', barber.id), barber);
+  };
+
+  const updateBarber = async (id: string, barber: Partial<Barber>) => {
+    await updateDoc(doc(db, 'barbers', id), barber);
+  };
+
+  const deleteBarber = async (id: string) => {
+    await deleteDoc(doc(db, 'barbers', id));
+  };
+
+  const resetData = async () => {
+    // Note: Resetting all data in Firestore requires a bit more logic,
+    // usually handled via admin SDK or deleting and recreating collections.
+    // For this context, we'll recreate the defaults. Note that this doesn't
+    // delete appointments for safety unless specifically coded.
+
+    for (const service of initialServices) {
+      await setDoc(doc(db, 'services', service.id), service);
+    }
+    for (const barber of initialBarbers) {
+      await setDoc(doc(db, 'barbers', barber.id), barber);
+    }
+    await setDoc(doc(db, 'config', 'settings'), initialSettings);
+    await setDoc(doc(db, 'config', 'siteContent'), initialSiteContent);
+  };
+
+  if (!initialized) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <AppContext.Provider value={{
