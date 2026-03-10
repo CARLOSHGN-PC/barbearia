@@ -2,10 +2,24 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // PERMITIR TUDO: Isso permite que qualquer visitante crie agendamentos e veja os dados.
-      // Num cenário real, você deve proteger áreas como "admin" usando Firebase Auth depois.
-      allow read, write: if true;
+    // Permite leitura pública de barbearia, serviços e configs do site
+    match /barbers/{document=**} {
+      allow read: if true;
+      allow write: if true; // Temporário: Sem auth no sistema
+    }
+    match /services/{document=**} {
+      allow read: if true;
+      allow write: if true; // Temporário: Sem auth no sistema
+    }
+    match /config/{document=**} {
+      allow read: if true;
+      allow write: if true; // Temporário: Sem auth no sistema
+    }
+
+    // Agendamentos: Permite ler e escrever publicamente (temporário)
+    match /appointments/{document=**} {
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

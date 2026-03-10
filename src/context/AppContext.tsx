@@ -36,9 +36,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    let appsLoaded = false;
+    let servicesLoaded = false;
+    let barbersLoaded = false;
+    let settingsLoaded = false;
+    let contentLoaded = false;
+
+    const checkInit = () => {
+      if (appsLoaded && servicesLoaded && barbersLoaded && settingsLoaded && contentLoaded) {
+        setInitialized(true);
+      }
+    };
+
     const unsubAppointments = onSnapshot(collection(db, 'appointments'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
       setAppointments(data);
+      appsLoaded = true; checkInit();
     });
 
     const unsubServices = onSnapshot(collection(db, 'services'), (snapshot) => {
@@ -51,6 +64,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           await setDoc(doc(db, 'services', service.id), service);
         });
       }
+      servicesLoaded = true; checkInit();
     });
 
     const unsubBarbers = onSnapshot(collection(db, 'barbers'), (snapshot) => {
@@ -63,6 +77,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           await setDoc(doc(db, 'barbers', barber.id), barber);
         });
       }
+      barbersLoaded = true; checkInit();
     });
 
     const unsubSettings = onSnapshot(doc(db, 'config', 'settings'), (snapshot) => {
@@ -71,6 +86,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setDoc(doc(db, 'config', 'settings'), initialSettings);
       }
+      settingsLoaded = true; checkInit();
     });
 
     const unsubSiteContent = onSnapshot(doc(db, 'config', 'siteContent'), (snapshot) => {
@@ -79,9 +95,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setDoc(doc(db, 'config', 'siteContent'), initialSiteContent);
       }
+      contentLoaded = true; checkInit();
     });
-
-    setInitialized(true);
 
     return () => {
       unsubAppointments();
