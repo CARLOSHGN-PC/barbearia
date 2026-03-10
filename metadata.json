@@ -1,0 +1,5 @@
+{
+  "name": "The Classic Barber",
+  "description": "Sistema de agendamento online para barbearia com área de cliente e painel administrativo.",
+  "requestFramePermissions": []
+}
