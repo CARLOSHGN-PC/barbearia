@@ -31,7 +31,11 @@ export const Admin = () => {
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      // Ensure the user is logged out when leaving the Admin component
+      signOut(auth).catch(console.error);
+    };
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
