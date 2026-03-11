@@ -176,7 +176,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   if (!initialized) {
-    return null; // Or a loading spinner
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col justify-center items-center text-zinc-100">
+        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-zinc-400 animate-pulse">Carregando dados da barbearia...</p>
+      </div>
+    );
   }
 
   return (
