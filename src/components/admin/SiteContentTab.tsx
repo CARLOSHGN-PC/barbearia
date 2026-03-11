@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, CheckCircle, Image, Type, AlignLeft } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
@@ -9,6 +9,11 @@ export const SiteContentTab = () => {
   const { siteContent, updateSiteContent } = useAppContext();
   const [formData, setFormData] = useState(siteContent);
   const [message, setMessage] = useState('');
+
+  // Sincroniza o estado local quando os dados do Firebase terminam de carregar
+  useEffect(() => {
+    setFormData(siteContent);
+  }, [siteContent]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

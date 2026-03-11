@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, AlertTriangle, RotateCcw, CheckCircle, Lock, Clock } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
@@ -11,6 +11,11 @@ export const SettingsTab = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+
+  // Sincroniza o formulário quando os settings do Firebase chegam ou atualizam
+  useEffect(() => {
+    setFormData(settings);
+  }, [settings]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
