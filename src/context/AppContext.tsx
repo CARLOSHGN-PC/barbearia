@@ -132,27 +132,57 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addService = async (service: Service) => {
-    await setDoc(doc(db, 'services', service.id), service);
+    try {
+      await setDoc(doc(db, 'services', service.id), service);
+    } catch (e) {
+      console.error("Firestore error (addService):", e);
+      throw e;
+    }
   };
 
   const updateService = async (id: string, service: Partial<Service>) => {
-    await updateDoc(doc(db, 'services', id), service);
+    try {
+      await updateDoc(doc(db, 'services', id), service);
+    } catch (e) {
+      console.error("Firestore error (updateService):", e);
+      throw e;
+    }
   };
 
   const deleteService = async (id: string) => {
-    await deleteDoc(doc(db, 'services', id));
+    try {
+      await deleteDoc(doc(db, 'services', id));
+    } catch (e) {
+      console.error("Firestore error (deleteService):", e);
+      throw e;
+    }
   };
 
   const addBarber = async (barber: Barber) => {
-    await setDoc(doc(db, 'barbers', barber.id), barber);
+    try {
+      await setDoc(doc(db, 'barbers', barber.id), barber);
+    } catch (e) {
+      console.error("Firestore error (addBarber):", e);
+      throw e;
+    }
   };
 
   const updateBarber = async (id: string, barber: Partial<Barber>) => {
-    await updateDoc(doc(db, 'barbers', id), barber);
+    try {
+      await updateDoc(doc(db, 'barbers', id), barber);
+    } catch (e) {
+      console.error("Firestore error (updateBarber):", e);
+      throw e;
+    }
   };
 
   const deleteBarber = async (id: string) => {
-    await deleteDoc(doc(db, 'barbers', id));
+    try {
+      await deleteDoc(doc(db, 'barbers', id));
+    } catch (e) {
+      console.error("Firestore error (deleteBarber):", e);
+      throw e;
+    }
   };
 
   const resetData = async () => {
