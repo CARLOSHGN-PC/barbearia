@@ -3,6 +3,7 @@ import { Save, CheckCircle, Image, Type, AlignLeft } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { ImageUpload } from '../ui/ImageUpload';
 
 export const SiteContentTab = () => {
   const { siteContent, updateSiteContent } = useAppContext();
@@ -54,6 +55,15 @@ export const SiteContentTab = () => {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-2">Logo da Barbearia (Opcional)</label>
+              <ImageUpload
+                value={formData.logoUrl || ''}
+                onChange={(url) => setFormData(prev => ({ ...prev, logoUrl: url }))}
+                folder="site"
+                className="mt-2"
+              />
+            </div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-zinc-300 mb-2">Slogan</label>
               <Input
                 name="slogan"
@@ -145,19 +155,12 @@ export const SiteContentTab = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">URL da Imagem de Fundo</label>
-              <Input
-                name="heroImage"
+              <label className="block text-sm font-medium text-zinc-300 mb-2">Imagem de Fundo (Home)</label>
+              <ImageUpload
                 value={formData.heroImage}
-                onChange={handleChange}
-                className="bg-zinc-950 border-zinc-800 text-white"
-                required
+                onChange={(url) => setFormData(prev => ({ ...prev, heroImage: url }))}
+                folder="site"
               />
-              {formData.heroImage && (
-                <div className="mt-4 h-32 w-full rounded-md overflow-hidden relative">
-                  <img src={formData.heroImage} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
             </div>
           </div>
         </div>

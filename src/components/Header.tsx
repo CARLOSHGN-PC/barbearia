@@ -15,8 +15,14 @@ export const Header = () => {
     <header className="bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-amber-500 hover:text-amber-400 transition-colors overflow-hidden" onClick={closeMenu}>
-          <Scissors className="w-7 h-7 shrink-0" />
-          <span className="font-serif text-xl sm:text-2xl font-bold tracking-widest uppercase truncate">{siteContent.name}</span>
+          {siteContent.logoUrl ? (
+            <img src={siteContent.logoUrl} alt={siteContent.name} className="h-10 w-auto object-contain" />
+          ) : (
+            <>
+              <Scissors className="w-7 h-7 shrink-0" />
+              <span className="font-serif text-xl sm:text-2xl font-bold tracking-widest uppercase truncate">{siteContent.name}</span>
+            </>
+          )}
         </Link>
         
         {/* Desktop Nav */}
