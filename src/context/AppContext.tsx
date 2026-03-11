@@ -45,10 +45,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
         setServices(data);
       } else {
-        // Initialize if empty
-        initialServices.forEach(async (service) => {
-          await setDoc(doc(db, 'services', service.id), service);
-        });
+        // Apenas use local em vez de sobrescrever o banco de dados prematuramente
+        setServices(initialServices);
       }
     });
 
@@ -57,10 +55,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Barber));
         setBarbers(data);
       } else {
-        // Initialize if empty
-        initialBarbers.forEach(async (barber) => {
-          await setDoc(doc(db, 'barbers', barber.id), barber);
-        });
+        setBarbers(initialBarbers);
       }
     });
 
@@ -68,7 +63,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (snapshot.exists()) {
         setSettings(snapshot.data() as Settings);
       } else {
-        setDoc(doc(db, 'config', 'settings'), initialSettings);
+        setSettings(initialSettings);
       }
     });
 
@@ -76,7 +71,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (snapshot.exists()) {
         setSiteContent(snapshot.data() as SiteContent);
       } else {
-        setDoc(doc(db, 'config', 'siteContent'), initialSiteContent);
+        setSiteContent(initialSiteContent);
       }
     });
 

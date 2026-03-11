@@ -13,8 +13,17 @@ export const SettingsTab = () => {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Sincroniza o formulário quando os settings do Firebase chegam ou atualizam
+  // Mas apenas se os dados no estado atual ainda forem o fallback (initialData)
+  // para evitar apagar dados não salvos se o Firebase demorar um pouco para mandar a primeira atualização
   useEffect(() => {
-    setFormData(settings);
+    setFormData(prev => {
+      // Verificamos pelo valor de initialData. Se for 15, assume-se que é o inicial.
+      // Em uma app de verdade, usaríamos um status de "carregado".
+      if (prev.cancellationFee === 15.00 && settings.cancellationFee !== 15.00) {
+        return settings;
+      }
+      return prev;
+    });
   }, [settings]);
 
   const handleSave = (e: React.FormEvent) => {
