@@ -5,12 +5,14 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Barber } from '../../types';
 import { ImageUpload } from '../ui/ImageUpload';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export const BarbersTab = () => {
   const { barbers, addBarber, updateBarber, deleteBarber } = useAppContext();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState<Partial<Barber>>({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const handleEdit = (barber: Barber) => {
     setEditingId(barber.id);
@@ -53,9 +55,7 @@ export const BarbersTab = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja remover este barbeiro?')) {
-      deleteBarber(id);
-    }
+    setDeleteConfirmId(id);
   };
 
   return (
@@ -167,6 +167,16 @@ export const BarbersTab = () => {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={() => {
+          if (deleteConfirmId) deleteBarber(deleteConfirmId);
+        }}
+        title="Remover Barbeiro"
+        message="Tem certeza que deseja remover este barbeiro? Esta ação não pode ser desfeita."
+      />
     </div>
   );
 };

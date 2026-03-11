@@ -3,12 +3,14 @@ import { Save, AlertTriangle, RotateCcw, CheckCircle, Lock, Clock } from 'lucide
 import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export const SettingsTab = () => {
   const { settings, updateSettings, resetData } = useAppContext();
   const [formData, setFormData] = useState(settings);
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,11 +26,13 @@ export const SettingsTab = () => {
   };
 
   const handleReset = () => {
-    if (window.confirm('Tem certeza que deseja redefinir TODOS os dados para o padrão inicial? Isso apagará todos os agendamentos, serviços e configurações atuais.')) {
-      resetData();
-      setMessage('Dados redefinidos com sucesso!');
-      setTimeout(() => setMessage(''), 3000);
-    }
+    setIsResetConfirmOpen(true);
+  };
+
+  const confirmReset = () => {
+    resetData();
+    setMessage('Dados redefinidos com sucesso!');
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const handleBusinessHourChange = (day: number, field: 'open' | 'close' | 'isClosed', value: any) => {
@@ -166,6 +170,14 @@ export const SettingsTab = () => {
           </Button>
         </div>
       </form>
+
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        onClose={() => setIsResetConfirmOpen(false)}
+        onConfirm={confirmReset}
+        title="Redefinir Dados"
+        message="Tem certeza que deseja redefinir TODOS os dados para o padrão inicial? Isso apagará serviços, barbeiros e configurações atuais."
+      />
     </div>
   );
 };

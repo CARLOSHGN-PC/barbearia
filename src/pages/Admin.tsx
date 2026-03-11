@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, CalendarDays, Scissors, Users, Settings, FileText, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AdminLogin } from '../components/admin/AdminLogin';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 import { DashboardTab } from '../components/admin/DashboardTab';
 import { AppointmentsTab } from '../components/admin/AppointmentsTab';
 import { ServicesTab } from '../components/admin/ServicesTab';
@@ -14,34 +16,61 @@ type Tab = 'dashboard' | 'appointments' | 'services' | 'barbers' | 'content' | '
 
 export const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
 
   useEffect(() => {
-    const auth = localStorage.getItem('barbershop_admin_auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const handleLogin = (password: string) => {
-    const adminPassword = localStorage.getItem('barbershop_admin_password') || 'admin123';
-    if (password === adminPassword) {
-      setIsAuthenticated(true);
-      setAuthError('');
-      localStorage.setItem('barbershop_admin_auth', 'true');
-    } else {
-      setAuthError('Senha incorreta.');
+  const handleLogin = async (email: string, password: string) => {
+    setLoginLoading(true);
+    setAuthError('');
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      console.error("Login erro:", error);
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        setAuthError('E-mail ou senha incorretos.');
+      } else if (error.code === 'auth/invalid-email') {
+         setAuthError('E-mail inválido.');
+      } else {
+        setAuthError('Ocorreu um erro ao fazer login. Tente novamente.');
+      }
+    } finally {
+      setLoginLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('barbershop_admin_auth');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Erro ao fazer logout", error);
+    }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-[calc(100vh-5rem)] bg-zinc-950 flex items-center justify-center">
+        <p className="text-zinc-400">Verificando autenticação...</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} error={authError} />;
+    return <AdminLogin onLogin={handleLogin} error={authError} isLoading={loginLoading} />;
   }
 
   const tabs = [

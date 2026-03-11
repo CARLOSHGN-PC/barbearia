@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Appointment } from '../../types';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export const AppointmentsTab = () => {
   const { appointments, services, barbers, updateAppointmentStatus, updateAppointment, deleteAppointment } = useAppContext();
@@ -18,6 +19,7 @@ export const AppointmentsTab = () => {
   const [searchPhone, setSearchPhone] = useState('');
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Appointment>>({});
 
   const filteredAppointments = useMemo(() => {
@@ -57,9 +59,7 @@ export const AppointmentsTab = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir permanentemente este agendamento? Esta ação não pode ser desfeita.')) {
-      deleteAppointment(id);
-    }
+    setDeleteConfirmId(id);
   };
 
   return (
@@ -225,6 +225,16 @@ export const AppointmentsTab = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={() => {
+          if (deleteConfirmId) deleteAppointment(deleteConfirmId);
+        }}
+        title="Excluir Agendamento"
+        message="Tem certeza que deseja excluir permanentemente este agendamento? Esta ação não pode ser desfeita."
+      />
     </div>
   );
 };

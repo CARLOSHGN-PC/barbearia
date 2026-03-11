@@ -3,6 +3,7 @@ import { Upload, X, Loader2 } from 'lucide-react';
 import { Button } from './Button';
 import { storage } from '../../firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { AlertModal } from './AlertModal';
 
 interface ImageUploadProps {
   value: string;
@@ -15,7 +16,12 @@ interface ImageUploadProps {
 export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, folder, label, className = '' }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [alertState, setAlertState] = useState<{isOpen: boolean, message: string, title: string}>({isOpen: false, message: '', title: ''});
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const showAlert = (title: string, message: string) => {
+    setAlertState({ isOpen: true, title, message });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -23,7 +29,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, folde
 
     // Validate type
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem válida (JPEG, PNG, etc).');
+      showAlert('Arquivo Inválido', 'Por favor, selecione uma imagem válida (JPEG, PNG, etc).');
       return;
     }
 
@@ -45,7 +51,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, folde
       },
       (error) => {
         console.error('Erro ao fazer upload:', error);
-        alert('Erro ao enviar a imagem. Tente novamente.');
+        showAlert('Erro de Upload', 'Erro ao enviar a imagem. Tente novamente.');
         setIsUploading(false);
       },
       async () => {
@@ -114,6 +120,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, folde
           </Button>
         </div>
       )}
+
+      <AlertModal
+        isOpen={alertState.isOpen}
+        onClose={() => setAlertState({ ...alertState, isOpen: false })}
+        title={alertState.title}
+        message={alertState.message}
+      />
     </div>
   );
 };
