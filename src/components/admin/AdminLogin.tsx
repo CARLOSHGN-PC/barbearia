@@ -5,16 +5,18 @@ import { Input } from '../ui/Input';
 import { motion } from 'motion/react';
 
 interface AdminLoginProps {
-  onLogin: (password: string) => void;
+  onLogin: (email: string, password: string) => void;
   error?: string;
+  isLoading?: boolean;
 }
 
-export const AdminLogin = ({ onLogin, error }: AdminLoginProps) => {
+export const AdminLogin = ({ onLogin, error, isLoading }: AdminLoginProps) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(password);
+    onLogin(email, password);
   };
 
   return (
@@ -34,21 +36,41 @@ export const AdminLogin = ({ onLogin, error }: AdminLoginProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">Senha de Acesso</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">E-mail</label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Digite seu e-mail"
+              className="bg-zinc-950 border-zinc-800 text-white mb-4"
+              required
+            />
+
+            <label className="block text-sm font-medium text-zinc-300 mb-2">Senha</label>
             <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Digite a senha"
+              placeholder="Digite sua senha"
               className="bg-zinc-950 border-zinc-800 text-white"
               required
             />
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           </div>
 
-          <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold">
-            <LogIn className="w-5 h-5 mr-2" />
-            Entrar no Painel
+          <Button
+            type="submit"
+            className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold disabled:opacity-50"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">Carregando...</span>
+            ) : (
+              <>
+                <LogIn className="w-5 h-5 mr-2" />
+                Entrar no Painel
+              </>
+            )}
           </Button>
         </form>
       </motion.div>

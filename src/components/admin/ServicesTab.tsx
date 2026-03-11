@@ -4,12 +4,14 @@ import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Service } from '../../types';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export const ServicesTab = () => {
   const { services, addService, updateService, deleteService } = useAppContext();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState<Partial<Service>>({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const handleEdit = (service: Service) => {
     setEditingId(service.id);
@@ -52,9 +54,7 @@ export const ServicesTab = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja remover este serviço?')) {
-      deleteService(id);
-    }
+    setDeleteConfirmId(id);
   };
 
   return (
@@ -171,6 +171,16 @@ export const ServicesTab = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={() => {
+          if (deleteConfirmId) deleteService(deleteConfirmId);
+        }}
+        title="Remover Serviço"
+        message="Tem certeza que deseja remover este serviço? Esta ação não pode ser desfeita."
+      />
     </div>
   );
 };
