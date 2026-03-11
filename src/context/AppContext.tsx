@@ -33,25 +33,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [barbers, setBarbers] = useState<Barber[]>(initialBarbers);
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [siteContent, setSiteContent] = useState<SiteContent>(initialSiteContent);
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    let appsLoaded = false;
-    let servicesLoaded = false;
-    let barbersLoaded = false;
-    let settingsLoaded = false;
-    let contentLoaded = false;
-
-    const checkInit = () => {
-      if (appsLoaded && servicesLoaded && barbersLoaded && settingsLoaded && contentLoaded) {
-        setInitialized(true);
-      }
-    };
-
     const unsubAppointments = onSnapshot(collection(db, 'appointments'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
       setAppointments(data);
-      appsLoaded = true; checkInit();
     });
 
     const unsubServices = onSnapshot(collection(db, 'services'), (snapshot) => {
@@ -64,7 +50,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           await setDoc(doc(db, 'services', service.id), service);
         });
       }
-      servicesLoaded = true; checkInit();
     });
 
     const unsubBarbers = onSnapshot(collection(db, 'barbers'), (snapshot) => {
@@ -77,7 +62,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           await setDoc(doc(db, 'barbers', barber.id), barber);
         });
       }
-      barbersLoaded = true; checkInit();
     });
 
     const unsubSettings = onSnapshot(doc(db, 'config', 'settings'), (snapshot) => {
@@ -86,7 +70,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setDoc(doc(db, 'config', 'settings'), initialSettings);
       }
-      settingsLoaded = true; checkInit();
     });
 
     const unsubSiteContent = onSnapshot(doc(db, 'config', 'siteContent'), (snapshot) => {
@@ -95,7 +78,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setDoc(doc(db, 'config', 'siteContent'), initialSiteContent);
       }
-      contentLoaded = true; checkInit();
     });
 
     return () => {
@@ -174,15 +156,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await setDoc(doc(db, 'config', 'settings'), initialSettings);
     await setDoc(doc(db, 'config', 'siteContent'), initialSiteContent);
   };
-
-  if (!initialized) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col justify-center items-center text-zinc-100">
-        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-zinc-400 animate-pulse">Carregando dados da barbearia...</p>
-      </div>
-    );
-  }
 
   return (
     <AppContext.Provider value={{
