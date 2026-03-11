@@ -114,7 +114,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateSiteContent = async (newContent: SiteContent) => {
-    await setDoc(doc(db, 'config', 'siteContent'), newContent);
+    try {
+      await setDoc(doc(db, 'config', 'siteContent'), newContent);
+    } catch (error) {
+      console.error("Erro ao atualizar siteContent no Firestore:", error);
+      throw error;
+    }
   };
 
   const addService = async (service: Service) => {

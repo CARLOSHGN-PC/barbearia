@@ -10,11 +10,16 @@ export const SiteContentTab = () => {
   const [formData, setFormData] = useState(siteContent);
   const [message, setMessage] = useState('');
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateSiteContent(formData);
-    setMessage('Conteúdo do site salvo com sucesso!');
-    setTimeout(() => setMessage(''), 3000);
+    try {
+      await updateSiteContent(formData);
+      setMessage('Conteúdo do site salvo com sucesso!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao salvar. Verifique se tem permissão ou sua conexão.');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
