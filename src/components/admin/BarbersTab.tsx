@@ -4,6 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Barber } from '../../types';
+import { ImageUpload } from '../ui/ImageUpload';
 
 export const BarbersTab = () => {
   const { barbers, addBarber, updateBarber, deleteBarber } = useAppContext();
@@ -97,12 +98,11 @@ export const BarbersTab = () => {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-zinc-300 mb-1">URL da Foto</label>
-              <Input
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Foto do Barbeiro</label>
+              <ImageUpload
                 value={formData.imageUrl || ''}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                className="bg-zinc-950 border-zinc-800 text-white"
-                placeholder="https://exemplo.com/foto.jpg"
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                folder="barbers"
               />
             </div>
             <div className="md:col-span-2 flex items-center gap-2 mt-2">

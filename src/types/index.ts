@@ -39,6 +39,7 @@ export type Settings = {
 
 export type SiteContent = {
   name: string;
+  logoUrl?: string;
   slogan: string;
   description: string;
   phone: string;
