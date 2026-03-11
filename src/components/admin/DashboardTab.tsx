@@ -123,7 +123,13 @@ export const DashboardTab = () => {
         <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/80 backdrop-blur-sm">
           <h2 className="text-xl font-bold text-white flex items-center gap-3 uppercase tracking-wide">
             <Calendar className="w-6 h-6 text-amber-500" />
-            Agenda do Dia: <span className="text-amber-500">{format(parse(filterDate, 'yyyy-MM-dd', new Date()), "dd 'de' MMMM", { locale: ptBR })}</span>
+            Agenda do Dia: <span className="text-amber-500">{(() => {
+              try {
+                return format(parse(filterDate, 'yyyy-MM-dd', new Date()), "dd 'de' MMMM", { locale: ptBR });
+              } catch (e) {
+                return filterDate;
+              }
+            })()}</span>
           </h2>
         </div>
         

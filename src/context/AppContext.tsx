@@ -38,6 +38,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const unsubAppointments = onSnapshot(collection(db, 'appointments'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
       setAppointments(data);
+    }, (error) => {
+      console.error("Firestore error (appointments):", error);
     });
 
     const unsubServices = onSnapshot(collection(db, 'services'), (snapshot) => {
@@ -48,6 +50,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         // Apenas use local em vez de sobrescrever o banco de dados prematuramente
         setServices(initialServices);
       }
+    }, (error) => {
+      console.error("Firestore error (services):", error);
+      setServices(initialServices);
     });
 
     const unsubBarbers = onSnapshot(collection(db, 'barbers'), (snapshot) => {
@@ -57,6 +62,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setBarbers(initialBarbers);
       }
+    }, (error) => {
+      console.error("Firestore error (barbers):", error);
+      setBarbers(initialBarbers);
     });
 
     const unsubSettings = onSnapshot(doc(db, 'config', 'settings'), (snapshot) => {
@@ -65,6 +73,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setSettings(initialSettings);
       }
+    }, (error) => {
+      console.error("Firestore error (settings):", error);
+      setSettings(initialSettings);
     });
 
     const unsubSiteContent = onSnapshot(doc(db, 'config', 'siteContent'), (snapshot) => {
@@ -73,6 +84,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setSiteContent(initialSiteContent);
       }
+    }, (error) => {
+      console.error("Firestore error (siteContent):", error);
+      setSiteContent(initialSiteContent);
     });
 
     return () => {
