@@ -127,9 +127,22 @@ export const MyAppointments = () => {
                 {myAppointments.map((app, index) => {
                   const service = services.find(s => s.id === app.serviceId);
                   const barber = barbers.find(b => b.id === app.barberId);
-                  const appointmentDateTime = parse(`${app.date} ${app.startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                  let appointmentDateTime = new Date();
+                  try {
+                    appointmentDateTime = parse(`${app.date} ${app.startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                  } catch (e) {
+                    console.error("Invalid date or time format in appointment:", app);
+                  }
+
                   const isPastAppointment = isPast(appointmentDateTime);
                   const canCancel = (app.status === 'agendado' || app.status === 'confirmado') && !isPastAppointment;
+
+                  let formattedDate = app.date;
+                  try {
+                    formattedDate = format(parse(app.date, 'yyyy-MM-dd', new Date()), "dd/MM/yyyy");
+                  } catch (e) {
+                    // keep original format if parsing fails
+                  }
 
                   return (
                     <motion.div 
@@ -161,7 +174,7 @@ export const MyAppointments = () => {
                         <div className="flex flex-wrap items-center gap-4 text-sm">
                           <div className="flex items-center gap-2 text-zinc-300 bg-zinc-950 px-4 py-2 rounded-sm border border-zinc-800/50">
                             <Calendar className="w-4 h-4 text-amber-500" />
-                            <span className="font-medium tracking-wide">{format(parse(app.date, 'yyyy-MM-dd', new Date()), "dd/MM/yyyy")}</span>
+                            <span className="font-medium tracking-wide">{formattedDate}</span>
                           </div>
                           <div className="flex items-center gap-2 text-zinc-300 bg-zinc-950 px-4 py-2 rounded-sm border border-zinc-800/50">
                             <Clock className="w-4 h-4 text-amber-500" />
@@ -216,12 +229,24 @@ export const MyAppointments = () => {
                 </div>
                 
                 <p className="text-zinc-300 mb-8 text-lg font-light leading-relaxed">
-                  Tem certeza que deseja cancelar seu agendamento para <strong className="text-white font-medium">{format(parse(selectedAppointment.date, 'yyyy-MM-dd', new Date()), "dd/MM/yyyy")} às {selectedAppointment.startTime}</strong>?
+                  Tem certeza que deseja cancelar seu agendamento para <strong className="text-white font-medium">
+                    {(() => {
+                      try {
+                        return format(parse(selectedAppointment.date, 'yyyy-MM-dd', new Date()), "dd/MM/yyyy");
+                      } catch (e) {
+                        return selectedAppointment.date;
+                      }
+                    })()} às {selectedAppointment.startTime}</strong>?
                 </p>
 
                 {(() => {
-                  const appointmentDateTime = parse(`${selectedAppointment.date} ${selectedAppointment.startTime}`, 'yyyy-MM-dd HH:mm', new Date());
-                  const hoursDifference = differenceInHours(appointmentDateTime, new Date());
+                  let hoursDifference = 0;
+                  try {
+                    const appointmentDateTime = parse(`${selectedAppointment.date} ${selectedAppointment.startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                    hoursDifference = differenceInHours(appointmentDateTime, new Date());
+                  } catch (e) {
+                    console.error("Invalid appointment date format", selectedAppointment);
+                  }
                   
                   if (hoursDifference < settings.cancellationFeeHoursLimit) {
                     return (
