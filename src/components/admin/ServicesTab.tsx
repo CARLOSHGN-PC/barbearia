@@ -31,26 +31,30 @@ export const ServicesTab = () => {
     setFormData({});
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.price || !formData.durationMinutes) return;
 
-    if (isAdding) {
-      addService({
-        id: `s${Date.now()}`,
-        name: formData.name,
-        price: Number(formData.price),
-        durationMinutes: Number(formData.durationMinutes),
-        description: formData.description || ''
-      });
-    } else if (editingId) {
-      updateService(editingId, {
-        name: formData.name,
-        price: Number(formData.price),
-        durationMinutes: Number(formData.durationMinutes),
-        description: formData.description || ''
-      });
+    try {
+      if (isAdding) {
+        await addService({
+          id: `s${Date.now()}`,
+          name: formData.name,
+          price: Number(formData.price),
+          durationMinutes: Number(formData.durationMinutes),
+          description: formData.description || ''
+        });
+      } else if (editingId) {
+        await updateService(editingId, {
+          name: formData.name,
+          price: Number(formData.price),
+          durationMinutes: Number(formData.durationMinutes),
+          description: formData.description || ''
+        });
+      }
+      handleCancel();
+    } catch (e) {
+      alert("Erro ao salvar o serviço no banco de dados. Verifique se o Firestore está criado e as permissões estão corretas.");
     }
-    handleCancel();
   };
 
   const handleDelete = (id: string) => {
