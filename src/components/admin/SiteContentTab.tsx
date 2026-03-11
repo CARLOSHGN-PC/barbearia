@@ -11,8 +11,16 @@ export const SiteContentTab = () => {
   const [message, setMessage] = useState('');
 
   // Sincroniza o estado local quando os dados do Firebase terminam de carregar
+  // Mas apenas se o formulário ainda for igual ao inicial para não apagar edições não salvas do usuário
   useEffect(() => {
-    setFormData(siteContent);
+    setFormData(prev => {
+      // Se não houver nome no siteContent do formulário atual, significa que ainda está carregando ou usando inicial, então atualizamos.
+      // Se já foi preenchido por digitação ou carregado corretamente antes, não reescrevemos para não resetar enquanto o usuário digita.
+      if (prev.name === 'The Classic Barber' && siteContent.name !== 'The Classic Barber') {
+        return siteContent;
+      }
+      return prev;
+    });
   }, [siteContent]);
 
   const handleSave = async (e: React.FormEvent) => {
