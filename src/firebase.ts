@@ -3,14 +3,15 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
+// As chaves do Firebase Web SDK são públicas por design e necessárias no build do React.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyAZTcyd71J2c5e9f-mbHmgMPp5A6M3Ndh4",
+  authDomain: "barbearia---g.firebaseapp.com",
+  projectId: "barbearia---g",
+  storageBucket: "barbearia---g.firebasestorage.app",
+  messagingSenderId: "629483060813",
+  appId: "1:629483060813:web:120725833ca34914092604",
+  measurementId: "G-YM6T0BFQWH"
 };
 
 // Initialize Firebase
