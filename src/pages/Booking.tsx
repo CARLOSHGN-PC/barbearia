@@ -27,6 +27,7 @@ export const Booking = () => {
   
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Generate dates for the next 14 days
   const availableDates = Array.from({ length: 14 }).map((_, i) => addDays(startOfToday(), i));
@@ -58,26 +59,53 @@ export const Booking = () => {
     setStep(prev => prev - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const service = services.find(s => s.id === formData.serviceId);
-    if (!service) return;
+    setSubmitError('');
+
+    const cleanName = formData.name.trim();
+    const cleanPhone = formData.phone.replace(/\D/g, '');
+    const service = activeServices.find(s => s.id === formData.serviceId);
+    const barber = activeBarbers.find(b => b.id === formData.barberId);
+
+    if (!cleanName) {
+      setSubmitError('Informe seu nome completo.');
+      return;
+    }
+
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setSubmitError('Informe um telefone válido com DDD.');
+      return;
+    }
+
+    if (!service || !barber || !formData.time) {
+      setSubmitError('Selecione um serviço, barbeiro ativo, data e horário válidos.');
+      return;
+    }
+
+    const dateKey = format(formData.date, 'yyyy-MM-dd');
+    const appointmentId = `${formData.barberId}_${dateKey}_${formData.time.replace(':', '-')}`;
 
     const newAppointment: Appointment = {
-      id: Math.random().toString(36).substr(2, 9),
-      clientName: formData.name,
-      clientPhone: formData.phone,
+      id: appointmentId,
+      clientName: cleanName,
+      clientPhone: cleanPhone,
       serviceId: formData.serviceId,
       barberId: formData.barberId,
-      date: format(formData.date, 'yyyy-MM-dd'),
+      date: dateKey,
       startTime: formData.time,
       endTime: calculateEndTime(formData.time, service.durationMinutes),
       status: 'agendado',
     };
 
-    addAppointment(newAppointment);
-    setIsSuccess(true);
+    try {
+      await addAppointment(newAppointment);
+      const history = JSON.parse(localStorage.getItem('barbershop_my_appointments') || '[]');
+      localStorage.setItem('barbershop_my_appointments', JSON.stringify([newAppointment, ...history].slice(0, 20)));
+      setIsSuccess(true);
+    } catch (error) {
+      setSubmitError('Este horário acabou de ser ocupado. Por favor, escolha outro horário.');
+    }
   };
 
   const slideVariants = {
@@ -131,8 +159,10 @@ export const Booking = () => {
     );
   }
 
-  const selectedService = services.find(s => s.id === formData.serviceId);
-  const selectedBarber = barbers.find(b => b.id === formData.barberId);
+  const activeServices = services.filter((service) => service.isActive !== false);
+  const activeBarbers = barbers.filter((barber) => barber.availability !== false && barber.isActive !== false);
+  const selectedService = activeServices.find(s => s.id === formData.serviceId);
+  const selectedBarber = activeBarbers.find(b => b.id === formData.barberId);
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -166,7 +196,7 @@ export const Booking = () => {
 
         <div className="bg-zinc-900 p-6 sm:p-10 rounded-sm border border-zinc-800 shadow-2xl relative min-h-[400px]">
           <form onSubmit={handleSubmit} className="h-full flex flex-col">
-            
+            {submitError && <p className="mb-4 text-sm text-red-400">{submitError}</p>}
             <div className="flex-grow relative">
               <AnimatePresence custom={direction} mode="wait">
                 
@@ -190,7 +220,7 @@ export const Booking = () => {
                     <div className="space-y-4">
                       <label className="block text-sm font-semibold tracking-wide uppercase text-zinc-400">Serviço</label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {services.map(service => (
+                        {activeServices.map(service => (
                           <div 
                             key={service.id}
                             onClick={() => setFormData(prev => ({ ...prev, serviceId: service.id }))}
@@ -213,7 +243,7 @@ export const Booking = () => {
                     <div className="space-y-4 pt-6 border-t border-zinc-800/50">
                       <label className="block text-sm font-semibold tracking-wide uppercase text-zinc-400">Profissional</label>
                       <div className="grid grid-cols-2 gap-4">
-                        {barbers.map(barber => (
+                        {activeBarbers.map(barber => (
                           <div 
                             key={barber.id}
                             onClick={() => setFormData(prev => ({ ...prev, barberId: barber.id }))}

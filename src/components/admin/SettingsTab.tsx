@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, AlertTriangle, RotateCcw, CheckCircle, Lock, Clock } from 'lucide-react';
+import { Save, AlertTriangle, RotateCcw, CheckCircle, Clock } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -8,7 +8,6 @@ import { ConfirmModal } from '../ui/ConfirmModal';
 export const SettingsTab = () => {
   const { settings, updateSettings, resetData } = useAppContext();
   const [formData, setFormData] = useState(settings);
-  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
@@ -29,12 +28,7 @@ export const SettingsTab = () => {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateSettings(formData);
-    
-    if (password) {
-      localStorage.setItem('barbershop_admin_password', password);
-      setPassword('');
-    }
-    
+
     setMessage('Configurações salvas com sucesso!');
     setTimeout(() => setMessage(''), 3000);
   };
@@ -79,24 +73,6 @@ export const SettingsTab = () => {
       )}
 
       <form onSubmit={handleSave} className="space-y-8">
-        {/* Segurança */}
-        <div className="bg-zinc-900 p-6 rounded-sm border border-zinc-800">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-amber-500" />
-            Segurança
-          </h3>
-          <div className="max-w-md">
-            <label className="block text-sm font-medium text-zinc-300 mb-2">Nova Senha do Painel (deixe em branco para não alterar)</label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nova senha"
-              className="bg-zinc-950 border-zinc-800 text-white"
-            />
-          </div>
-        </div>
-
         {/* Política de Cancelamento */}
         <div className="bg-zinc-900 p-6 rounded-sm border border-zinc-800">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
