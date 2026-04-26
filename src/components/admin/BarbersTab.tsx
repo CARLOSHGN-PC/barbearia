@@ -23,7 +23,7 @@ export const BarbersTab = () => {
   const handleAdd = () => {
     setIsAdding(true);
     setEditingId(null);
-    setFormData({ name: '', imageUrl: '', specialty: '', availability: true });
+    setFormData({ name: '', imageUrl: '', specialty: '', availability: true, isActive: true });
   };
 
   const handleCancel = () => {
@@ -33,22 +33,24 @@ export const BarbersTab = () => {
   };
 
   const handleSave = () => {
-    if (!formData.name || !formData.imageUrl) return;
+    if (!formData.name?.trim() || !formData.imageUrl) return;
 
     if (isAdding) {
       addBarber({
         id: `b${Date.now()}`,
-        name: formData.name,
+        name: formData.name.trim(),
         imageUrl: formData.imageUrl,
         specialty: formData.specialty || '',
-        availability: formData.availability ?? true
+        availability: formData.availability ?? true,
+        isActive: formData.isActive ?? true
       });
     } else if (editingId) {
       updateBarber(editingId, {
-        name: formData.name,
+        name: formData.name.trim(),
         imageUrl: formData.imageUrl,
         specialty: formData.specialty || '',
-        availability: formData.availability ?? true
+        availability: formData.availability ?? true,
+        isActive: formData.isActive ?? true
       });
     }
     handleCancel();
@@ -105,14 +107,25 @@ export const BarbersTab = () => {
                 folder="barbers"
               />
             </div>
-            <div className="md:col-span-2 flex items-center gap-2 mt-2">
-              <input
-                type="checkbox"
-                checked={formData.availability ?? true}
-                onChange={(e) => setFormData({ ...formData, availability: e.target.checked })}
-                className="rounded border-zinc-800 bg-zinc-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-zinc-950"
-              />
-              <label className="text-sm font-medium text-zinc-300">Disponível para agendamentos</label>
+            <div className="md:col-span-2 flex flex-col gap-2 mt-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.availability ?? true}
+                  onChange={(e) => setFormData({ ...formData, availability: e.target.checked })}
+                  className="rounded border-zinc-800 bg-zinc-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-zinc-950"
+                />
+                <span className="text-sm font-medium text-zinc-300">Disponível para agendamentos</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.isActive ?? true}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  className="rounded border-zinc-800 bg-zinc-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-zinc-950"
+                />
+                <span className="text-sm font-medium text-zinc-300">Barbeiro ativo no site</span>
+              </label>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">

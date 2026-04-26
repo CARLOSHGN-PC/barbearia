@@ -5,6 +5,9 @@ import { storage } from '../../firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { AlertModal } from './AlertModal';
 
+const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
@@ -27,9 +30,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, folde
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate type
-    if (!file.type.startsWith('image/')) {
-      showAlert('Arquivo Inválido', 'Por favor, selecione uma imagem válida (JPEG, PNG, etc).');
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showAlert('Formato inválido', 'Use JPG, PNG ou WEBP.');
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      showAlert('Arquivo muito grande', 'A imagem deve ter no máximo 2MB.');
       return;
     }
 
