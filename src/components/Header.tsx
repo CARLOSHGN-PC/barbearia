@@ -27,9 +27,10 @@ export const Header = () => {
         
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          <a href={`${import.meta.env.BASE_URL}#servicos`} className="text-sm font-semibold tracking-wide uppercase text-zinc-400 hover:text-amber-500 transition-colors">Serviços</a>
-          <a href={`${import.meta.env.BASE_URL}#barbeiros`} className="text-sm font-semibold tracking-wide uppercase text-zinc-400 hover:text-amber-500 transition-colors">Barbeiros</a>
+          <a href="/#servicos" className="text-sm font-semibold tracking-wide uppercase text-zinc-400 hover:text-amber-500 transition-colors">Serviços</a>
+          <a href="/#barbeiros" className="text-sm font-semibold tracking-wide uppercase text-zinc-400 hover:text-amber-500 transition-colors">Barbeiros</a>
           <Link to="/meus-agendamentos" className={`text-sm font-semibold tracking-wide uppercase transition-colors ${location.pathname === '/meus-agendamentos' ? 'text-amber-500' : 'text-zinc-400 hover:text-amber-500'}`}>Meus Agendamentos</Link>
+          <Link to="/admin" className={`text-sm font-semibold tracking-wide uppercase transition-colors ${location.pathname === '/admin' ? 'text-amber-500' : 'text-zinc-600 hover:text-zinc-300'}`}>Admin</Link>
         </nav>
         
         <div className="hidden md:flex items-center gap-4">
@@ -58,9 +59,10 @@ export const Header = () => {
             className="md:hidden bg-zinc-950 border-b border-zinc-800 overflow-hidden"
           >
             <div className="px-4 py-6 flex flex-col gap-4">
-              <a href={`${import.meta.env.BASE_URL}#servicos`} className="text-lg font-medium text-zinc-300 hover:text-amber-500 py-2 border-b border-zinc-800/50" onClick={closeMenu}>Serviços</a>
-              <a href={`${import.meta.env.BASE_URL}#barbeiros`} className="text-lg font-medium text-zinc-300 hover:text-amber-500 py-2 border-b border-zinc-800/50" onClick={closeMenu}>Barbeiros</a>
+              <a href="/#servicos" className="text-lg font-medium text-zinc-300 hover:text-amber-500 py-2 border-b border-zinc-800/50" onClick={closeMenu}>Serviços</a>
+              <a href="/#barbeiros" className="text-lg font-medium text-zinc-300 hover:text-amber-500 py-2 border-b border-zinc-800/50" onClick={closeMenu}>Barbeiros</a>
               <Link to="/meus-agendamentos" className="text-lg font-medium text-zinc-300 hover:text-amber-500 py-2 border-b border-zinc-800/50" onClick={closeMenu}>Meus Agendamentos</Link>
+              <Link to="/admin" className="text-lg font-medium text-zinc-500 hover:text-zinc-300 py-2 border-b border-zinc-800/50" onClick={closeMenu}>Painel Admin</Link>
               <Link to="/agendar" className="mt-4 bg-amber-500 text-zinc-950 px-4 py-3 rounded-sm font-bold text-center uppercase tracking-wider" onClick={closeMenu}>
                 Agendar Horário
               </Link>
