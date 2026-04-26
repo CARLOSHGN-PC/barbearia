@@ -3,8 +3,7 @@ import { LayoutDashboard, CalendarDays, Scissors, Users, Settings, FileText, Log
 import { motion, AnimatePresence } from 'motion/react';
 import { AdminLogin } from '../components/admin/AdminLogin';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { Navigate } from 'react-router-dom';
-import { auth, isAdminUser } from '../firebase';
+import { auth } from '../firebase';
 import { DashboardTab } from '../components/admin/DashboardTab';
 import { AppointmentsTab } from '../components/admin/AppointmentsTab';
 import { ServicesTab } from '../components/admin/ServicesTab';
@@ -17,27 +16,25 @@ type Tab = 'dashboard' | 'appointments' | 'services' | 'barbers' | 'content' | '
 
 export const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
-        const admin = await isAdminUser(user);
-        setIsAuthorized(admin);
       } else {
         setIsAuthenticated(false);
-        setIsAuthorized(false);
       }
       setIsLoading(false);
     });
 
     return () => {
       unsubscribe();
+      // Ensure the user is logged out when leaving the Admin component
+      signOut(auth).catch(console.error);
     };
   }, []);
 
@@ -78,10 +75,6 @@ export const Admin = () => {
 
   if (!isAuthenticated) {
     return <AdminLogin onLogin={handleLogin} error={authError} isLoading={loginLoading} />;
-  }
-
-  if (!isAuthorized) {
-    return <Navigate to="/" replace />;
   }
 
   const tabs = [

@@ -1,45 +1,24 @@
-import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { User, getAuth } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
+// Your web app's Firebase configuration
+// As chaves do Firebase Web SDK são públicas por design e necessárias no build do React.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyAZTcyd71J2c5e9f-mbHmgMPp5A6M3Ndh4",
+  authDomain: "barbearia---g.firebaseapp.com",
+  projectId: "barbearia---g",
+  storageBucket: "barbearia---g.firebasestorage.app",
+  messagingSenderId: "629483060813",
+  appId: "1:629483060813:web:120725833ca34914092604",
+  measurementId: "G-YM6T0BFQWH"
 };
 
-const requiredEnvKeys = [
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_STORAGE_BUCKET',
-  'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  'VITE_FIREBASE_APP_ID',
-] as const;
-
-for (const key of requiredEnvKeys) {
-  if (!import.meta.env[key]) {
-    throw new Error(`Variável obrigatória ausente: ${key}`);
-  }
-}
-
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-export const analytics = typeof window !== 'undefined' && import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
-  ? getAnalytics(app)
-  : null;
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
-
-export const isAdminUser = async (user: User | null): Promise<boolean> => {
-  if (!user) return false;
-  const token = await user.getIdTokenResult(true);
-  return token.claims.admin === true;
-};

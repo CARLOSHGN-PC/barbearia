@@ -4,7 +4,6 @@ export type Service = {
   durationMinutes: number;
   price: number;
   description?: string;
-  isActive?: boolean;
 };
 
 export type Barber = {
@@ -13,7 +12,6 @@ export type Barber = {
   imageUrl: string;
   specialty?: string;
   availability?: boolean;
-  isActive?: boolean;
 };
 
 export type AppointmentStatus = 'agendado' | 'confirmado' | 'concluido' | 'cancelado' | 'nao_compareceu';
